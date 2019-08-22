@@ -8,4 +8,4 @@
 
 环境：
 python 3.6; 
-需要：codecs; bs4 (BeautifulSoup); xlwt
+需要：codecs; bs4 (BeautifulSoup); xlwt;
