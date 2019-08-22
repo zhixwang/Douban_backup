@@ -7,5 +7,5 @@
 运行grab.py即可。
 
 环境：
-python 2.7; 
-需要：codecs; bs4 (BeautifulSoup)
+python 3.6; 
+需要：codecs; bs4 (BeautifulSoup); xlwt
