@@ -9,3 +9,6 @@
 环境：
 python 3.6; 
 需要：codecs; bs4 (BeautifulSoup); xlwt;
+
+感谢@matrixknight 的更新，现在支持Python 3.6, 输出格式为更友好的xls表格文件，同时会显示“作者”“价格”“出版社”等
+
