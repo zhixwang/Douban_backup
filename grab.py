@@ -314,7 +314,10 @@ def grab_data(kind,user_id):
     if config.Out_Put_Type == 0:  
         output_data(file_name,total_num,title_list,comment_list,rating_list)
     elif config.Out_Put_Type == 1:
-        write_movie_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list)
+        if (config.Movie == True) and (kind == 'movie'):
+            write_movie_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list)
+        if (config.Music == True) and (kind == 'music'):
+            write_music_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list)
 
 def write_movie_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list):
     workbook = xlwt.Workbook()
@@ -342,6 +345,33 @@ def write_movie_excel(total_num,title_list,comment_list,rating_list, inputdate_l
             sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
         
     workbook.save('collectMovie.xls')
+
+def write_music_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list):
+    workbook = xlwt.Workbook()
+    sheet1 = workbook.add_sheet('Movies',cell_overwrite_ok=True)
+    rowTitle = ["Title","Rate","Date","Comment","Intro"]
+    #
+    sheet1.col(0).width = 256 * 40
+    sheet1.col(1).width = 256 * 4
+    sheet1.col(2).width = 256 * 15 #date
+    sheet1.col(3).width = 256 * 100 #comment
+    sheet1.col(4).width = 256 * 100 #intro
+
+    for i in range(0,len(rowTitle)):
+        sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
+
+    for i in range(0,total_num):
+        sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+        if rating_list[i]:
+            sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+        if inputdate_list[i]:
+            sheet1.write(i+1,2,inputdate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+        if comment_list[i]:
+            sheet1.write(i+1,3,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+        if intro_list[i]:
+            sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+        
+    workbook.save('collectMusic.xls')
 
 user = config.User_id
 if config.Book == True:
