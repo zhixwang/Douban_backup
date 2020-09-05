@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 import codecs
 import config as config
 import xlwt
-
+import pandas as pd
 
 def get_url_content(url):   # fetch the webpage
     i_headers = {"User-Agent": "Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.1) Gecko/20090624 Firefox/3.5",\
@@ -89,41 +89,47 @@ def set_sheetstyle(name,height,bold=False):
 
 # write Excel document
 def write_book_excel(total_num,title_list,comment_list,rating_list, date_list, author_list, price_list, pub_list, releasedate_list):
-    workbook = xlwt.Workbook()
-    sheet1 = workbook.add_sheet('Books',cell_overwrite_ok=True)
-    rowTitle = ["Title","Rate","Date","Author","Release Date","Price","Pub","Comment"]
-    #colum0 = ["col1","col2","col3","col4","col5","col6"]
-    #
-    sheet1.col(0).width = 256 * 20
-    sheet1.col(1).width = 256 * 4
-    sheet1.col(2).width = 256 * 15 #date
-    sheet1.col(3).width = 256 * 20 #author
-    sheet1.col(4).width = 256 * 15 #release date
-    sheet1.col(5).width = 256 * 10  #price
-    sheet1.col(6).width = 256 * 25 #pub
-    sheet1.col(7).width = 256 * 100 #comment
+    output_dict = {'Title': title_list, "Rate": rating_list, "Author": author_list, \
+                   "Release Date": releasedate_list, "Price": price_list, "Pub" : pub_list, \
+                  "Comment": comment_list}    
+    output_df = pd.DataFrame(output_dict)    
+    output_df.to_excel("collectBook.xlsx")
+    
+    # workbook = xlwt.Workbook()
+    # sheet1 = workbook.add_sheet('Books',cell_overwrite_ok=True)
+    # rowTitle = ["Title","Rate","Date","Author","Release Date","Price","Pub","Comment"]
+    # #colum0 = ["col1","col2","col3","col4","col5","col6"]
+    # #
+    # sheet1.col(0).width = 256 * 20
+    # sheet1.col(1).width = 256 * 4
+    # sheet1.col(2).width = 256 * 15 #date
+    # sheet1.col(3).width = 256 * 20 #author
+    # sheet1.col(4).width = 256 * 15 #release date
+    # sheet1.col(5).width = 256 * 10  #price
+    # sheet1.col(6).width = 256 * 25 #pub
+    # sheet1.col(7).width = 256 * 100 #comment
 
-    for i in range(0,len(rowTitle)):
-        sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
+    # for i in range(0,len(rowTitle)):
+    #     sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
 
-    for i in range(0,total_num):
-        sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if rating_list[i]:
-            sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if date_list[i]:
-            sheet1.write(i+1,2,date_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if author_list[i]:
-            sheet1.write(i+1,3,author_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if releasedate_list[i]:
-            sheet1.write(i+1,4,releasedate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if price_list[i]:
-            sheet1.write(i+1,5,price_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if pub_list[i]:
-            sheet1.write(i+1,6,pub_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if comment_list[i]:
-            sheet1.write(i+1,7,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    # for i in range(0,total_num):
+    #     sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if rating_list[i]:
+    #         sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if date_list[i]:
+    #         sheet1.write(i+1,2,date_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if author_list[i]:
+    #         sheet1.write(i+1,3,author_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if releasedate_list[i]:
+    #         sheet1.write(i+1,4,releasedate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if price_list[i]:
+    #         sheet1.write(i+1,5,price_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if pub_list[i]:
+    #         sheet1.write(i+1,6,pub_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if comment_list[i]:
+    #         sheet1.write(i+1,7,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
 
-    workbook.save('collectBook.xls')
+    # workbook.save('collectBook.xls')
 
 def grab_book(user_id):     #grab book information, because book has different titling method
     file_name='book.txt'
@@ -171,14 +177,17 @@ def grab_book(user_id):     #grab book information, because book has different t
             # get comments
             raw_comment = soup.select('p[class^="comment"]')[count] # original information containing comment
             comment =  re.findall("comment\">\n\s(.*)\n</p>",raw_comment.prettify())
+            # comment =  raw_comment.get_text()
 
              # michael modified == get dates
             raw_inputdate = soup.select('span[class^="date"]')[count]
             inputdate = re.findall(r"(\d{4}-\d{1,2}-\d{1,2})",raw_inputdate.prettify())
-
+            # inputdate = raw_inputdate.get_text()
+            
             # michael modified == get pubs
             raw_pub = soup.select('div[class^="pub"]')[count]
-            pub =  re.findall("pub\">\n\s(.*)\n</div>", raw_pub.prettify())         
+            pub =  re.findall("pub\">\n\s(.*)\n</div>", raw_pub.prettify())    
+            # pub = raw_pub.get_text()
             
             count = count +1
             if len(comment) > 0:
@@ -229,6 +238,7 @@ def grab_book(user_id):     #grab book information, because book has different t
     if config.Out_Put_Type == 0:    
         output_more_data(file_name,total_num,title_list,comment_list,rating_list, date_list)
     elif config.Out_Put_Type == 1:
+        pass
         write_book_excel(total_num,title_list,comment_list,rating_list, date_list, author_list, price_list, pubs_list, releasedate_list)
 
 def grab_data(kind,user_id):
@@ -276,9 +286,12 @@ def grab_data(kind,user_id):
         raw_inputdates = soup.select('span[class="date"]')
         t_num = len(raw_titles)
         for item_id in range(0,t_num):
-            item_title = re.findall("em>\n\s(.*)\n</em>",raw_titles[item_id].prettify())[0]
-            item_intro = re.findall("intro\">\n\s(.*)\n</li>", raw_intros[item_id].prettify())[0]
-            item_inputdates = re.findall("date\">\n\s(.*)\n</span>", raw_inputdates[item_id].prettify())[0]
+            # item_title = re.findall("em>\n\s(.*)\n</em>",raw_titles[item_id].prettify())[0]
+            item_title = raw_titles[item_id].get_text() 
+            # item_intro = re.findall("intro\">\n\s(.*)\n</li>", raw_intros[item_id].prettify())[0]
+            item_intro = raw_intros[item_id].get_text() 
+            # item_inputdates = re.findall("date\">\n\s(.*)\n</span>", raw_inputdates[item_id].prettify())[0]
+            item_inputdates = raw_inputdates[item_id].get_text() 
             tmp_title_list.append(item_title)
             title_list.append(item_title)
             intro_list.append(item_intro)
@@ -291,8 +304,10 @@ def grab_data(kind,user_id):
         n_com = len(raw_comments)    # number of ratings
         for i in range(0,n_com):
             raw_com_title = raw_comments[i].find_previous('em') # look for the title of the comment
-            com_title = re.findall("em>\n\s(.*)\n</em>",raw_com_title.prettify())[0]
-            comment = re.findall("comment\">\n\s(.*)\n</span>",raw_comments[i].prettify())[0]
+            # com_title = re.findall("em>\n\s(.*)\n</em>",raw_com_title.prettify())[0]
+            com_title = raw_com_title.get_text()
+            # comment = re.findall("comment\">\n\s(.*)\n</span>",raw_comments[i].prettify())[0]
+            comment = raw_comments[i].get_text()
             if com_title in tmp_title_list:
                 idx = tmp_title_list.index(com_title)
                 comments[idx] = comment
@@ -303,7 +318,8 @@ def grab_data(kind,user_id):
         n_rat = len(raw_ratings)    # number of ratings
         for i in range(0,n_rat):
             raw_rate_title = raw_ratings[i].find_previous('em')
-            rate_title = re.findall("em>\n\s(.*)\n</em>",raw_rate_title.prettify())[0]
+            # rate_title = re.findall("em>\n\s(.*)\n</em>",raw_rate_title.prettify())[0]
+            rate_title = raw_rate_title.get_text()
             raw_rating = soup.select('span[class^="rating"]')[i].prettify()
             rating = re.findall('[1-5]',raw_rating)[0]
             if rate_title in tmp_title_list:
@@ -320,58 +336,64 @@ def grab_data(kind,user_id):
             write_music_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list)
 
 def write_movie_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list):
-    workbook = xlwt.Workbook()
-    sheet1 = workbook.add_sheet('Movies',cell_overwrite_ok=True)
-    rowTitle = ["Title","Rate","Date","Comment","Intro"]
-    #
-    sheet1.col(0).width = 256 * 40
-    sheet1.col(1).width = 256 * 4
-    sheet1.col(2).width = 256 * 15 #date
-    sheet1.col(3).width = 256 * 100 #comment
-    sheet1.col(4).width = 256 * 100 #intro
+    output_dict = {"Title": title_list,"Rate":rating_list,"Date":inputdate_list,"Comment":comment_list,"Intro":intro_list}
+    output_df = pd.DataFrame(output_dict)
+    output_df.to_excel("collectMovie.xlsx")
+    # workbook = xlwt.Workbook()
+    # sheet1 = workbook.add_sheet('Movies',cell_overwrite_ok=True)
+    # rowTitle = ["Title","Rate","Date","Comment","Intro"]
+    # #
+    # sheet1.col(0).width = 256 * 40
+    # sheet1.col(1).width = 256 * 4
+    # sheet1.col(2).width = 256 * 15 #date
+    # sheet1.col(3).width = 256 * 100 #comment
+    # sheet1.col(4).width = 256 * 100 #intro
 
-    for i in range(0,len(rowTitle)):
-        sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
+    # for i in range(0,len(rowTitle)):
+    #     sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
 
-    for i in range(0,total_num):
-        sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if rating_list[i]:
-            sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if inputdate_list[i]:
-            sheet1.write(i+1,2,inputdate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if comment_list[i]:
-            sheet1.write(i+1,3,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if intro_list[i]:
-            sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    # for i in range(0,total_num):
+    #     sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if rating_list[i]:
+    #         sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if inputdate_list[i]:
+    #         sheet1.write(i+1,2,inputdate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if comment_list[i]:
+    #         sheet1.write(i+1,3,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if intro_list[i]:
+    #         sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
         
-    workbook.save('collectMovie.xls')
+    # workbook.save('collectMovie.xls')
 
 def write_music_excel(total_num,title_list,comment_list,rating_list, inputdate_list, intro_list):
-    workbook = xlwt.Workbook()
-    sheet1 = workbook.add_sheet('Movies',cell_overwrite_ok=True)
-    rowTitle = ["Title","Rate","Date","Comment","Intro"]
-    #
-    sheet1.col(0).width = 256 * 40
-    sheet1.col(1).width = 256 * 4
-    sheet1.col(2).width = 256 * 15 #date
-    sheet1.col(3).width = 256 * 100 #comment
-    sheet1.col(4).width = 256 * 100 #intro
+    output_dict = {"Title": title_list,"Rate":rating_list,"Date":inputdate_list,"Comment":comment_list,"Intro":intro_list}
+    output_df = pd.DataFrame(output_dict)
+    output_df.to_excel("collectMusic.xlsx")
+    # workbook = xlwt.Workbook()
+    # sheet1 = workbook.add_sheet('Movies',cell_overwrite_ok=True)
+    # rowTitle = ["Title","Rate","Date","Comment","Intro"]
+    # #
+    # sheet1.col(0).width = 256 * 40
+    # sheet1.col(1).width = 256 * 4
+    # sheet1.col(2).width = 256 * 15 #date
+    # sheet1.col(3).width = 256 * 100 #comment
+    # sheet1.col(4).width = 256 * 100 #intro
 
-    for i in range(0,len(rowTitle)):
-        sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
+    # for i in range(0,len(rowTitle)):
+    #     sheet1.write(0,i,rowTitle[i],set_sheetstyle('Microsoft YaHei',220,True))
 
-    for i in range(0,total_num):
-        sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if rating_list[i]:
-            sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if inputdate_list[i]:
-            sheet1.write(i+1,2,inputdate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if comment_list[i]:
-            sheet1.write(i+1,3,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
-        if intro_list[i]:
-            sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    # for i in range(0,total_num):
+    #     sheet1.write(i+1,0,title_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if rating_list[i]:
+    #         sheet1.write(i+1,1,rating_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if inputdate_list[i]:
+    #         sheet1.write(i+1,2,inputdate_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if comment_list[i]:
+    #         sheet1.write(i+1,3,comment_list[i],set_sheetstyle('Microsoft YaHei',220,False))
+    #     if intro_list[i]:
+    #         sheet1.write(i+1,4,intro_list[i],set_sheetstyle('Microsoft YaHei',220,False))
         
-    workbook.save('collectMusic.xls')
+    # workbook.save('collectMusic.xls')
 
 user = config.User_id
 if config.Book == True:
